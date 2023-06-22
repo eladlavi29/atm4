@@ -126,14 +126,13 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 }
 
 void debug_fund(unsigned long addr){
-    printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 }
 
 int main(int argc, char *const argv[]) {
 	int err = 0;
 	unsigned long addr = find_symbol(argv[1], argv[2], &err);
 
-	else if (err == -2)
+	if (err == -2)
 		printf("%s is not a global symbol! :(\n", argv[1]);
 	else if (err == -1)
 		printf("%s not found!\n", argv[1]);
@@ -142,6 +141,8 @@ int main(int argc, char *const argv[]) {
 	else if (err == -4){
         //Omer (a.k.a my best friend in the whole world) 's responsibility
     }
+
+    printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 
     if (addr > 0)
 		debug_func(addr);
