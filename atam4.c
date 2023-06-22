@@ -127,7 +127,7 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 void debug_func(unsigned long addr, char* exe_file_name){
     int err = 0;
-    unsigned long main_addr = find_symbol("main", exe_file_name, &err);
+    unsigned long main_addr = find_symbol("min", exe_file_name, &err);
 
     printf("main will be loaded to 0x%lx\n", main_addr);
 
