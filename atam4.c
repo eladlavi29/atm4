@@ -126,7 +126,7 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 }
 
 void debug_fund(unsigned long addr){
-
+    printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 }
 
 int main(int argc, char *const argv[]) {
