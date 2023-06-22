@@ -125,7 +125,7 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 }
 
-void debug_fund(unsigned long addr){
+void debug_func(unsigned long addr){
 }
 
 int main(int argc, char *const argv[]) {
