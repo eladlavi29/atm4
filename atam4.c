@@ -125,7 +125,15 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 }
 
-void debug_func(unsigned long addr){
+void debug_func(unsigned long addr, char* exe_file_name){
+    int err = 0;
+    unsigned long main_addr = find_symbol("main", exe_file_name, &err);
+
+    printf("main will be loaded to 0x%lx\n", main_addr);
+
+    if(err < 0){
+        perror("Main not found");
+    }
 }
 
 int main(int argc, char *const argv[]) {
@@ -142,10 +150,10 @@ int main(int argc, char *const argv[]) {
         //Omer (a.k.a my best friend in the whole world) 's responsibility
     }
 
-    printf("%s will be loaded to 0x%lx\n", argv[1], addr);
+    //printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 
     if (addr > 0)
-		debug_func(addr);
+		debug_func(addr, argv[2]);
 
 	return 0;
 }
