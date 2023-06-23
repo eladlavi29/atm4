@@ -210,7 +210,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         if(regs.rsp > rsp)
             break;
     }
-    printf("PRF:: run #%d returned with %lld\n", counter, regs.eax);
+    printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
 }
 
 pid_t run_target(const char* func){
