@@ -131,7 +131,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     waitpid(child_pid, &wait_status, 0);
 
     int err = 0;
-    unsigned long main_addr = find_symbol("min", exe_file_name, &err);
+    unsigned long main_addr = find_symbol("main", exe_file_name, &err);
     if(err < 0){
         perror("Main not found");
     }
