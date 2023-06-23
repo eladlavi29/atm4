@@ -208,22 +208,13 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
 
     //Print return value
-    //Call func
-    if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
-        perror("ptrace");
-        return;
-    }
-    wait(wait_status);
-    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
-        perror("ptrace");
-        return;
-    }
+    //Save the rsp before calling func
     rsp = regs.rsp;
 
     printf("rsp: 0x%llx\n", regs.rsp);
 
     //Track rsp to find out when the func returned
-    do{
+    while(regs.rsp != rsp){
         if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
             perror("ptrace");
             return;
@@ -236,7 +227,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         }
 
         printf("rsp: 0x%llx\n", regs.rsp);
-    } while(regs.rsp > rsp);
+    }
 
     printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
 
