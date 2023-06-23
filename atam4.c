@@ -219,6 +219,8 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
     rsp = regs.rsp;
 
+    printf("rsp: 0x%llx\n", regs.rsp);
+
     //Track rsp to find out when the func returned
     while(WIFSTOPPED(wait_status)){
         if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
@@ -231,6 +233,8 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
             perror("ptrace");
             return;
         }
+
+        printf("rsp: 0x%llx\n", regs.rsp);
 
         if(regs.rsp > rsp)
             break;
