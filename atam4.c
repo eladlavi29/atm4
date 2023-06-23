@@ -161,7 +161,6 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
 
     int counter = 1, rsp;
-/*
     //Place breakpoint in func
     data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
     if(data < 0){
@@ -185,6 +184,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         perror("ptrace");
         return;
     }
+/*
 
     //Print rdi (first parameter)
     if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
