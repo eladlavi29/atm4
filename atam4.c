@@ -188,7 +188,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         return;
     }
     printf("PRF:: run #%d first parameter is %lld\n", counter, regs.rdi);
-
+/*
     //Print return value
     //Track rsp to find out when the func returned
     rsp = regs.rsp;
@@ -211,6 +211,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
             break;
     }
     printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
+    */
 }
 
 pid_t run_target(const char* func){
