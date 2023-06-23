@@ -164,7 +164,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         return;
     }
     regs.rip -= 1;
-    if(ptrace(PTRACE_SETREGS, child_pid, NULL, %regs)){
+    if(ptrace(PTRACE_SETREGS, child_pid, NULL, &regs)){
         perror("ptrace");
         return;
     }
@@ -197,7 +197,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         return;
     }
     regs.rip -= 1;
-    if(ptrace(PTRACE_SETREGS, child_pid, NULL, %regs)){
+    if(ptrace(PTRACE_SETREGS, child_pid, NULL, &regs)){
         perror("ptrace");
         return;
     }
