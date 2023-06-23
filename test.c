@@ -1,4 +1,5 @@
 int foo(int a, int b) {
+    printf("0\n");
     return a+b;
 }
 

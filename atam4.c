@@ -138,6 +138,10 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
 
     unsigned long data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)main_addr, NULL);
+    if(data < 0){
+        perror("ptrace");
+        return;
+    }
     unsigned long data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
     if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data_trap) < 0){
         perror("ptrace");
