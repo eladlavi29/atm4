@@ -127,7 +127,7 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     int wait_status;
-    struct user_regs_struct regs;
+    struct user_regs_struct regs, temp;
     waitpid(child_pid, &wait_status, 0);
 
     //Find main and wait till it starts to make sure loading is done
@@ -208,28 +208,25 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
 
     //Print return value
-    //Save the rsp before calling func
-    rsp = regs.rsp;
-
     printf("rsp: 0x%llx\n", regs.rsp);
 
     //Track rsp to find out when the func returned
-    while(regs.rsp != rsp){
+    do{
         if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
             perror("ptrace");
             return;
         }
         wait(wait_status);
 
-        if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+        if(ptrace(PTRACE_GETREGS, child_pid, NULL, &temp) < 0){
             perror("ptrace");
             return;
         }
 
-        printf("rsp: 0x%llx\n", regs.rsp);
-    }
+        printf("rsp: 0x%llx\n", temp.rsp);
+    } while(regs.rsp != temp.rsp);
 
-    printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
+    printf("PRF:: run #%d returned with %lld\n", counter, temp.rax);
 
     if(ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0){
         perror("ptrace");
