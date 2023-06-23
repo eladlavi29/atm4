@@ -159,7 +159,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     int counter = 1, rsp;
 
     //Place breakpoint in func
-    ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL)
+    ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
     if(data < 0){
         perror("ptrace");
         return;
