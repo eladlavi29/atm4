@@ -139,30 +139,75 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
 
     unsigned long data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)main_addr, NULL);
     unsigned long data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data_trap);
+    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data_trap) < 0){
+        perror("ptrace");
+        return;
+    }
 
-    ptrace(PTRACE_CONT, child_pid, NULL, NULL);
+    if(ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0){
+        perror("ptrace");
+        return;
+    }
     wait(&wait_status);
 
     //Handle breakpoint in main and remove it
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data);
+    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data) < 0){
+        perror("ptrace");
+        return;
+    }
 
-    int counter = 1, rdi;
+    int counter = 1, rsp;
 
     //Place breakpoint in func
-    data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
+    ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL)
+    if(data < 0){
+        perror("ptrace");
+        return;
+    }
     data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data_trap);
+    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data_trap) < 0){
+        perror("ptrace");
+        return;
+    }
 
-    ptrace(PTRACE_CONT, child_pid, NULL, NULL);
+    if(ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0){
+        perror("ptrace");
+        return;
+    }
     wait(&wait_status);
 
     //Handle breakpoint in func and remove it
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data);
+    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data) < 0){
+        perror("ptrace");
+        return;
+    }
 
     //Print rdi (first parameter)
-    ptrace(PTRACE_GETREGS, child_pid, NULL, &regs);
+    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+        perror("ptrace");
+        return;
+    }
     printf("PRF:: run #%d first parameter is %d\n", counter, regs.rdi);
+
+    //Print return value
+    //Track rsp to find out when the func returned
+    rsp = regs.rsp;
+    while(WIFSTOPPED(wait_status)){
+        if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
+            perror("ptrace");
+            return;
+        }
+        wait(wait_status);
+
+        if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+            perror("ptrace");
+            return;
+        }
+
+        if(regs.rsp > rsp)
+            break;
+    }
+    printf("PRF:: run #%d returned with %d\n", counter, regs.rax);
 }
 
 pid_t run_target(const char* func){
