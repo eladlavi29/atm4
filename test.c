@@ -1,12 +1,12 @@
 int foo(int a, int b) {
-    printf("0\n");
-    return a+b;
+    if(a == 0){
+        return b;
+    }
+    return foo(a - 1, b + 1);
 }
 
 int main () {
-    foo(3,4);
-    printf("1\n");
-    foo(0,0);
-    printf("2\n");
+    foo(3, 4);
+    foo(0, 0);
     return 0;
 }
