@@ -185,7 +185,7 @@ int main(int argc, char *const argv[]) {
 
     //printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 
-    pid_t child_pid = run_target(exefile_name);
+    pid_t child_pid = run_target(argv[2]);
     run_debugger(child_pid, addr, argv[2]);
 
 	return 0;
