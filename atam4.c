@@ -173,8 +173,6 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     //Place breakpoint in func
     data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
 
-    printf("func command: 0x%lx\n", data);
-
     if(data < 0){
         perror("ptrace");
         return;
@@ -208,11 +206,20 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         perror("ptrace");
         return;
     }
-/*
+
     //Print return value
-    //Track rsp to find out when the func returned
+    //Call func
+    if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
+        perror("ptrace");
+        return;
+    }
+    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+        perror("ptrace");
+        return;
+    }
     rsp = regs.rsp;
-    printf("rsp: 0x%lx\n", regs.rsp);
+
+    //Track rsp to find out when the func returned
     while(WIFSTOPPED(wait_status)){
         if(ptrace(PTRACE_SINGLESTEP, child_pid, NULL, NULL) < 0){
             perror("ptrace");
@@ -225,13 +232,11 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
             return;
         }
 
-        printf("rsp: 0x%lx\n", regs.rsp);
-
         if(regs.rsp > rsp)
             break;
     }
+
     printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
-    */
 
     if(ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0){
         perror("ptrace");
