@@ -161,7 +161,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
 
     int counter = 1, rsp;
-
+/*
     //Place breakpoint in func
     data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
     if(data < 0){
@@ -192,7 +192,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         return;
     }
     printf("PRF:: run #%d first parameter is %lld\n", counter, regs.rdi);
-/*
+
     //Print return value
     //Track rsp to find out when the func returned
     rsp = regs.rsp;
