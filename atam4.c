@@ -191,6 +191,13 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
     wait(&wait_status);
 
+    //Print rdi (first parameter)
+    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+        perror("ptrace");
+        return;
+    }
+    printf("PRF:: run #%d first parameter is %lld\n", counter, regs.rdi);
+
     //Handle breakpoint in func and remove it
     if(ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data) < 0){
         perror("ptrace");
@@ -201,13 +208,6 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         perror("ptrace");
         return;
     }
-
-    //Print rdi (first parameter)
-    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
-        perror("ptrace");
-        return;
-    }
-    printf("PRF:: run #%d first parameter is %lld\n", counter, regs.rdi);
 /*
     //Print return value
     //Track rsp to find out when the func returned
