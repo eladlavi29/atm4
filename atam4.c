@@ -177,7 +177,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     wait(&wait_status);
 
     //Handle breakpoint in func and remove it
-    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data) < 0){
+    if(ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data) < 0){
         perror("ptrace");
         return;
     }
