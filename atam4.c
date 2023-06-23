@@ -130,6 +130,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     struct user_regs_struct regs;
     waitpid(child_pid, &wait_status, 0);
 
+    //Find main and wait till it starts to make sure loading is done
     int err = 0;
     unsigned long main_addr = find_symbol("main", exe_file_name, &err);
     if(err < 0){
@@ -143,11 +144,25 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     ptrace(PTRACE_CONT, child_pid, NULL, NULL);
     wait(&wait_status);
 
-    //Handle breakpoint and remove it
-    printf("hi there\n");
+    //Handle breakpoint in main and remove it
     ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data);
 
+    int counter = 1, rdi;
+
+    //Place breakpoint in func
+    data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
+    data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data_trap);
+
     ptrace(PTRACE_CONT, child_pid, NULL, NULL);
+    wait(&wait_status);
+
+    //Handle breakpoint in func and remove it
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data);
+
+    //Print rdi (first parameter)
+    ptrace(PTRACE_GETREGS, child_pid, NULL, &regs);
+    printf("PRF:: run #%d first parameter is %d\n", counter, regs.rdi);
 }
 
 pid_t run_target(const char* func){
