@@ -212,6 +212,11 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     }
     printf("PRF:: run #%d returned with %lld\n", counter, regs.rax);
     */
+
+    if(ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0){
+        perror("ptrace");
+        return;
+    }
 }
 
 pid_t run_target(const char* func){
