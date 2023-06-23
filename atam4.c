@@ -224,11 +224,6 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
 
         printf("PRF:: run #%d returned with %lld\n", counter, temp.rax);
 
-        if (ptrace(PTRACE_CONT, child_pid, NULL, NULL) < 0) {
-            perror("ptrace");
-            return;
-        }
-
         //Place breakpoint in func
         ++counter;
         data = ptrace(PTRACE_PEEKTEXT, child_pid, (void *) addr, NULL);
