@@ -125,7 +125,7 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 }
 
-void run_debugger(pid_t child_pid, unsigned long addr){
+void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     int wait_status;
     struct user_regs_struct regs;
     waitpid(child_pid, &wait_status, 0);
@@ -138,14 +138,14 @@ void run_debugger(pid_t child_pid, unsigned long addr){
 
     unsigned long data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)main_addr, NULL);
     unsigned long data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)func_addr, (void*)data_trap);
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data_trap);
 
     ptrace(PTRACE_CONT, child_pid, NULL, NULL);
     wait(&wait_status);
 
     //Handle breakpoint and remove it
     printf("hi there\n");
-    ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data);
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data);
 
     ptrace(PTRACE_CONT, child_pid, NULL, NULL);
 }
@@ -186,7 +186,7 @@ int main(int argc, char *const argv[]) {
     //printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 
     pid_t child_pid = run_target(exefile_name);
-    run_debugger(child_pid, symbol_addr);
+    run_debugger(child_pid, addr, argv[2]);
 
 	return 0;
 }
