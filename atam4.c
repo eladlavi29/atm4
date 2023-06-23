@@ -125,14 +125,47 @@ unsigned long find_symbol(char* symbol_name, char* exe_file_name, int* error_val
 
 }
 
-void debug_func(unsigned long addr, char* exe_file_name){
+void run_debugger(pid_t child_pid, unsigned long addr){
+    int wait_status;
+    struct user_regs_struct regs;
+    waitpid(child_pid, &wait_status, 0);
+
     int err = 0;
     unsigned long main_addr = find_symbol("min", exe_file_name, &err);
-
-    printf("main will be loaded to 0x%lx\n", main_addr);
-
     if(err < 0){
         perror("Main not found");
+    }
+
+    unsigned long data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)main_addr, NULL);
+    unsigned long data_trap = (data & 0xFFFFFFFFFFFFFF00) | 0xCC;
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)func_addr, (void*)data_trap);
+
+    ptrace(PTRACE_CONT, child_pid, NULL, NULL);
+    wait(&wait_status);
+
+    //Handle breakpoint and remove it
+    printf("hi there\n");
+    ptrace(PTRACE_POKETEXT, child_pid, (void*)addr, (void*)data);
+
+    ptrace(PTRACE_CONT, child_pid, NULL, NULL);
+}
+
+pid_t run_target(const char* func){
+    pid_t pid = fork();
+
+    if(pid > 0){
+        return pid;
+    }
+    else if (pid == 0) {
+        if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
+            perror("ptrace");
+            exit(1);
+        }
+        execl(func, func, NULL);
+
+    } else {
+        perror("fork");
+        exit(1);
     }
 }
 
@@ -152,8 +185,8 @@ int main(int argc, char *const argv[]) {
 
     //printf("%s will be loaded to 0x%lx\n", argv[1], addr);
 
-    if (addr > 0)
-		debug_func(addr, argv[2]);
+    pid_t child_pid = run_target(exefile_name);
+    run_debugger(child_pid, symbol_addr);
 
 	return 0;
 }
