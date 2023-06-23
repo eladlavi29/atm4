@@ -155,7 +155,16 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     wait(&wait_status);
 
     //Handle breakpoint in main and remove it
+    if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
+        perror("ptrace");
+        return;
+    }
     if(ptrace(PTRACE_POKETEXT, child_pid, (void*)main_addr, (void*)data) < 0){
+        perror("ptrace");
+        return;
+    }
+    regs.rip -= 1;
+    if(ptrace(PTRACE_SETREGS, child_pid, NULL, %regs)){
         perror("ptrace");
         return;
     }
@@ -163,6 +172,9 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
     int counter = 1, rsp;
     //Place breakpoint in func
     data = ptrace(PTRACE_PEEKTEXT, child_pid, (void*)addr, NULL);
+
+    printf("func command: 0x%lx\n", data);
+
     if(data < 0){
         perror("ptrace");
         return;
@@ -184,7 +196,11 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         perror("ptrace");
         return;
     }
-/*
+    regs.rip -= 1;
+    if(ptrace(PTRACE_SETREGS, child_pid, NULL, %regs)){
+        perror("ptrace");
+        return;
+    }
 
     //Print rdi (first parameter)
     if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
@@ -192,7 +208,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         return;
     }
     printf("PRF:: run #%d first parameter is %lld\n", counter, regs.rdi);
-
+/*
     //Print return value
     //Track rsp to find out when the func returned
     rsp = regs.rsp;
