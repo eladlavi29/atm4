@@ -213,6 +213,7 @@ void run_debugger(pid_t child_pid, unsigned long addr, char* exe_file_name){
         perror("ptrace");
         return;
     }
+    wait(wait_status);
     if(ptrace(PTRACE_GETREGS, child_pid, NULL, &regs) < 0){
         perror("ptrace");
         return;
